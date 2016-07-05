@@ -20,7 +20,7 @@ npm i johnny-five
 
 If all goes well you should see pins A0, A1, A2 graphed at http://127.0.0.1:3000
 
-PROTIP: Chroms seems to handle this a lot better than Firefox (at least on linux)
+PROTIP: Chrome seems to handle this a lot better than Firefox (at least on linux)
 I am yet to profile anything, but I would expect either the obvious canvas calls or the 
  setTimeout calls, which I have seen cause problems in previous projects under specific FF versions
 
