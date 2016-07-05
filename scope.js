@@ -1,17 +1,18 @@
 
 var PORT = 3000
 
+var mtime = require('microtime.js')
 var app = require('express')();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 server.listen(PORT,()=>{ console.log("http://127.0.0.1:3000/") });
 
 
-ScanInterval=50//ms
+ScanInterval=30//ms
 INPUTS = {
-    'A0':0,
     'A1':0,
-    'A2':0
+    'A5':0
+    
 } //Which pins to read from. At this point the value is ignored and the keys are used as an array
 
 var HTML = `Server not ready, try F5...`
@@ -42,7 +43,7 @@ HTML=`
             var messages=['Initialised.'];
             var canvas = document.getElementById("myCanvas");
             var ctx = canvas.getContext("2d");
-            ctx.font="30px Verdana";
+            var Font="30px Verdana";
 
             var socket = io();
                         
@@ -66,6 +67,16 @@ HTML=`
                 setTimeout(Cleanup,0)                
             });
             
+            
+            //This will be the initial message from the server to the client
+            //It should look like this: 
+            //  {
+            //      ID: "An ID to assign the client in case of multiclient logic",
+            //      _note: "init",
+            //      Di: {
+            //          A1: {meta: {YOffset:0}}
+            //      }
+            //  }
             socket.on('HelloAck', function(msg){
                 console.dir({ACK:msg})
                 MYID=msg.ID
@@ -74,16 +85,9 @@ HTML=`
                     Datas[v]=msg.Di[v]||{}
                 }
             });
-            socket.emit('Hello', {});
             
-            function DrawMessages(){
-                //for each message, draw it in a HUD on the graph, each message may be string or object.msg
-                //currently a stub using console.log
-                for (var m in messages) 
-                    if (typeof m == "string") console.log(m)
-                    else                      console.log(m.msg)
-                messages=[]
-            }
+            //Call the server and expect a HelloAck
+            socket.emit('Hello', {});
             
             // In this case we draw the line for each Data, which is cumbersome to loop but faster to draw.
             function DrawData(){
@@ -92,6 +96,8 @@ HTML=`
                     ctx.beginPath(); 
                     YOffset = (Datas[D].meta?Datas[D].meta.YOffset||1:1) * YSpacing
                     
+                    //TODO optional meta.colour and meta.scale
+                    
                     ctx.fillText(D,XMargin, YOffset + Datas[D][ T[0] ] * YScale - 10);
                     ctx.moveTo(XMargin, YOffset + Datas[D][ T[0] ] * YScale)
                     for( var t in T ) if( Datas[D][ T[t] ] !== undefined ) {
@@ -99,14 +105,22 @@ HTML=`
                     }
                     ctx.stroke();
                 }
+                //Draw a little HUD with the delta from last samples
+                //It sure would be nice to use backticks here, but I refuse to escape them!
+                HUD="Sample Delta t: "+GetLastDelta()+"ns"
+                ctx.font="10px Verdana"
+                ctx.fillText(HUD, XMargin, 50); 
+                ctx.font=Font               
             }
+            
+            function GetLastDelta(){ var L = T.length; return T[L-1] - T[L-2];      }
             
             // Take a moment to clean up the orphaned Datas. 
             // We do so by making a new array and only copying over values for extant T's
             function Cleanup(){
                 for( var v in Datas ) if ( Datas.hasOwnProperty(v) ) {
                     out = {meta:Datas[v].meta}
-                    for( var t in T ) if(Datas[v][T[t]]) out[T[t]]=Datas[v][T[t]]
+                    for( var t in T ) if(Datas[v][T[t]]!==undefined) out[T[t]]=Datas[v][T[t]]
                     Datas[v] = out
                 }
             }
@@ -115,6 +129,7 @@ HTML=`
     </body>
 </html>`
 
+//Set up the connection by listening for the only client-to-server packet we expect.
 io.on('connection', function(socket){
     socket.on('Hello', function(msg){
         UID=~~(Math.random()*(1<<16))
@@ -136,7 +151,6 @@ function Initial (){
 }
 
 
-var mtime = require('microtime.js')
 var init = mtime.micro()
 function time(){
     return ~~( (mtime.micro()-init) / 10 )
@@ -149,9 +163,17 @@ board.on("ready", function() {
     var led = new five.Led(13);
     led.blink(500);
     
-    Datas={} // Much like the datas on the client side, only here we keep a map[D]{t,v}, though t isn't used yet
+    // Much like the datas on the client side, only here we keep a map[D]{t,v}, though t isn't used yet
+    // At runtime this should look something like:
+    // {
+    //      A0: {v:1024, t:12345},
+    //      A1: {v:10,   t:12555}
+    //  }
+    Datas={} 
+    
+    
     initSensor=(name)=>{
-        var sensor = new five.Sensor(name);
+        var sensor = new five.Sensor(name,~~(ScanInterval/2)||5);
         sensor.on("change", function(value) {
             Datas[name]={t:time(),v:value}
         });
