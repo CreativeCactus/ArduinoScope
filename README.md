@@ -48,3 +48,14 @@ you will see time lines of each 500ms in your graph.
 - Digital pins
 - Simplify API
 - Figure out why labels are hidden until sample list is filled
+
+# Backstory
+Two years ago I purchased an Emotiv EPOC consumer EEG. I found it to be utterly awesome, but I wanted to be able to hack with it. 
+Despite an absolute lack of hardware knowledge I decided to embark on a journey to build my own. After many iterations and tests, 
+I have found this to be a suitable setup for me to test until I have a design worth printing on PCB.
+
+Here is what my latest progress looks like. Some 2.7~ hz noise coming from either my legs where the electrodes are currently attached, or something in my two filters.
+<img src="https://raw.githubusercontent.com/CreativeCactus/ArduinoScope/master/wip.png"></img>
+
+My current design is based on <a href="https://people.ece.cornell.edu/land/courses/ece4760/FinalProjects/s2012/cwm55/cwm55_mj294/">THIS</a>:
+<img src="https://people.ece.cornell.edu/land/courses/ece4760/FinalProjects/s2012/cwm55/cwm55_mj294/img/amplifier.png"></img>
