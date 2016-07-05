@@ -11,7 +11,8 @@ server.listen(PORT,()=>{ console.log("http://127.0.0.1:3000/") });
 ScanInterval=30//ms
 INPUTS = {
     'A1':0,
-    'A5':0
+    'A5':0,
+    'A6':0
     
 } //Which pins to read from. At this point the value is ignored and the keys are used as an array
 
@@ -34,15 +35,21 @@ HTML=`
             var YScale = 0.7 //number of px per V
             var XScale = 0.0005 //number of px per T
             var XMargin = 15 //number of px to left of graph
-            var YSpacing = 100 //number of px to multiply YOffset by between graphs
+            var YSpacing = 60 //number of px to multiply YOffset by between graphs
             var MYID = null;
+            var GuideLines = 1 // number of seconds between vertical lines, floats ok, 0=none
             
             var T = [] //Timeline of data
             var Datas = {} //Map of map[t]value
             
             var messages=['Initialised.'];
             var canvas = document.getElementById("myCanvas");
+            
+            canvas.style.backgroundColor = 'rgba(0, 0, 0, 0)';
+            document.body.style.backgroundColor = '#111111';
             var ctx = canvas.getContext("2d");
+            
+            ctx.fillStyle="#FFFFFF";
             var Font="30px Verdana";
 
             var socket = io();
@@ -92,6 +99,19 @@ HTML=`
             // In this case we draw the line for each Data, which is cumbersome to loop but faster to draw.
             function DrawData(){
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                if(GuideLines){
+                    ctx.beginPath();
+                    ctx.strokeStyle="#00FF00";
+                    for (var i = 1; i <= TMAX/(100000*GuideLines); i++){
+                        var x=XMargin+ 100000*GuideLines*i*XScale
+                        ctx.moveTo(x, 0)
+                        ctx.lineTo(x, canvas.height)
+                    }
+                    ctx.stroke();
+                }
+                
+                ctx.strokeStyle="#FFFFFF";
                 for( var D in Datas ) if( Datas.hasOwnProperty(D) ) {
                     ctx.beginPath(); 
                     YOffset = (Datas[D].meta?Datas[D].meta.YOffset||1:1) * YSpacing
@@ -105,10 +125,12 @@ HTML=`
                     }
                     ctx.stroke();
                 }
+                
                 //Draw a little HUD with the delta from last samples
                 //It sure would be nice to use backticks here, but I refuse to escape them!
-                HUD="Sample Delta t: "+GetLastDelta()+"ns"
-                ctx.font="10px Verdana"
+                D=GetLastDelta()
+                HUD="Sample Delta t: "+D+"ns ≈ "+(100000/D)+" SPS"
+                ctx.font="16px Verdana"
                 ctx.fillText(HUD, XMargin, 50); 
                 ctx.font=Font               
             }

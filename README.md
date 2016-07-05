@@ -20,6 +20,10 @@ npm i johnny-five
 
 If all goes well you should see pins A0, A1, A2 graphed at http://127.0.0.1:3000
 
+PROTIP: Chroms seems to handle this a lot better than Firefox (at least on linux)
+I am yet to profile anything, but I would expect either the obvious canvas calls or the 
+ setTimeout calls, which I have seen cause problems in previous projects under specific FF versions
+
 The front end could use some serious work, but for now it is effective. You should 
 expect to see a 50hz or 60hz wave if nothing is connected, depending on where you live.
 
@@ -41,6 +45,6 @@ you will see time lines of each 500ms in your graph.
 
 - FFT
 - 3D
-- Time bars
 - Digital pins
 - Simplify API
+- Figure out why labels are hidden until sample list is filled
