@@ -8,7 +8,8 @@ Arduino must be running <a href="https://github.com/firmata/arduino">firmata</a>
 You can npm i directly from github like this:
 
 ```
-npm i -g CreativeCactus/ArduinoScope
+npm i CreativeCactus/ArduinoScope
+node ./node_modules/arduinoscope/scope.js
 ```
 
 ## Don't forget to plug in your Arduino (tested with Nano v3)
