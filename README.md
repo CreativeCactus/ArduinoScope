@@ -1,17 +1,14 @@
 # ArduinoScope
 A simple browser-based graph of arduino pins using firmata
-Arduino must be running firmata
 
-https://github.com/firmata/arduino
+Arduino must be running <a href="https://github.com/firmata/arduino">firmata</a>
 
 # How to run 
-No package.json included, just do:
 
-``` 
-npm i microtime.js 
-npm i express 
-npm i socket.io 
-npm i johnny-five
+You can npm i directly from github like this:
+
+```
+npm i -g CreativeCactus/ArduinoScope
 ```
 
 ## Don't forget to plug in your Arduino (tested with Nano v3)
