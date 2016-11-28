@@ -12,6 +12,8 @@ npm i CreativeCactus/ArduinoScope
 node ./node_modules/arduinoscope/scope.js
 ```
 
+Note that troubles with microtime.js might be fixed by changing to just microtime.
+
 ## Don't forget to plug in your Arduino (tested with Nano v3)
 
 ``` node scope.js ```
